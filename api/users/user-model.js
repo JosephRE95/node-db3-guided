@@ -42,10 +42,27 @@ join users as u
   */
 }
 
-function find() {
-  return db('users')
+async function find() {
+  const rows = await db('users as u') //line 60
+  .leftJoin('posts as p','u.id', '=', 'p.user_id') //lines 61,62
+  .count('p.id as post_count') // line 59
+  .groupBy('u.id') // line 63
+  .select('u.id as user_id', 'username') // code lines 56 - 58
+  console.log(rows)
+ return rows
   /*
     Improve so it resolves this structure:
+
+
+SELECT 
+u.id as user_id,
+username,
+count (p.id) as post_count
+from users as u
+left join posts as p
+	on u.id = p.user_id
+	GROUP by u.id;
+
 
     [
         {
