@@ -1,23 +1,20 @@
-const db = require('../../data/db-config.js')
+const db = require("../../data/db-config.js");
 
 module.exports = {
   findPosts,
   find,
   findById,
   add,
-  remove
-}
+  remove,
+};
 
 async function findPosts(user_id) {
-
-const rows = await db('posts as p')
-.select('p.id as post_id',
-  'contents',
-  'username')
-  .join('users as u', 'p.user_id','=','u.id')
-  .where('u.id',user_id)
-  console.log(rows)
-  return rows
+  const rows = await db("posts as p")
+    .select("p.id as post_id", "contents", "username")
+    .join("users as u", "p.user_id", "=", "u.id")
+    .where("u.id", user_id);
+  console.log(rows);
+  return rows;
   /*
     Implement so it resolves this structure:
 
@@ -43,13 +40,13 @@ join users as u
 }
 
 async function find() {
-  const rows = await db('users as u') //line 60
-  .leftJoin('posts as p','u.id', '=', 'p.user_id') //lines 61,62
-  .count('p.id as post_count') // line 59
-  .groupBy('u.id') // line 63
-  .select('u.id as user_id', 'username') // code lines 56 - 58
-  console.log(rows)
- return rows
+  const rows = await db("users as u") //line 60
+    .leftJoin("posts as p", "u.id", "=", "p.user_id") //lines 61,62
+    .count("p.id as post_count") // line 59
+    .groupBy("u.id") // line 63
+    .select("u.id as user_id", "username"); // code lines 56 - 58
+  console.log(rows);
+  return rows;
   /*
     Improve so it resolves this structure: DO NOT HIT ENTER
 
@@ -79,10 +76,40 @@ left join posts as p
   */
 }
 
-function findById(id) {
-  return db('users').where({ id }).first()
+async function findById(id) {
+  const rows = await db("users as u")
+    .leftJoin("posts as p", "u.id", "p.user_id")
+    .select("u.id as user_id", 
+    "username",
+     "contents", 
+     "p.id as post_id",
+     )
+    .where("u.id", id)
+
+  let result = rows.reduce(
+    (acc, row) => {
+      if (row.contents) {
+        acc.posts.push(row)
+      }
+      return acc
+    },
+    { user_id: rows[0].user_id, username: rows[0].username, posts: [] }
+  );
+
+  return result
   /*
     Improve so it resolves this structure:
+
+
+SELECT 
+u.id as user_id,
+username,
+contents ,
+p.id as post_id
+from users as u
+left join posts as p
+	on u.id = p.user_id
+	where u.id = 1;
 
     {
       "user_id": 2,
@@ -99,14 +126,15 @@ function findById(id) {
 }
 
 function add(user) {
-  return db('users')
+  return db("users")
     .insert(user)
-    .then(([id]) => { // eslint-disable-line
-      return findById(id)
-    })
+    .then(([id]) => {
+      // eslint-disable-line
+      return findById(id);
+    });
 }
 
 function remove(id) {
   // returns removed count
-  return db('users').where({ id }).del()
+  return db("users").where({ id }).del();
 }
