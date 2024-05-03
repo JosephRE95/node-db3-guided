@@ -89,7 +89,7 @@ async function findById(id) {
   let result = rows.reduce(
     (acc, row) => {
       if (row.contents) {
-        acc.posts.push(row)
+        acc.posts.push({contents: row.contents, post_id: row.post_id})
       }
       return acc
     },
