@@ -51,8 +51,7 @@ async function find() {
   console.log(rows)
  return rows
   /*
-    Improve so it resolves this structure:
-
+    Improve so it resolves this structure: DO NOT HIT ENTER
 
 SELECT 
 u.id as user_id,
